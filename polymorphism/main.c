@@ -18,16 +18,16 @@
 /*****************************************************
 * Class Shape
 ******************************************************/
-typedef struct ShapeVtbl ShapeVtbl;
+typedef struct IShapeOperations IShapeOperations;
 typedef struct Shape Shape;
 
-struct ShapeVtbl {
+struct IShapeOperations {
     uint32_t (*area)(Shape const * const me);
     void (*draw)(Shape const * const me);
 };
 
 struct Shape{
-    ShapeVtbl vptr;
+    IShapeOperations const *vptr;
     int16_t x; 
     int16_t y; 
 };
@@ -102,7 +102,7 @@ int main() {
     Shape const *s;
 
     s = largestShape(shapes, sizeof(shapes)/sizeof(shapes[0]));
-    printf("largetsShape s(x=%d,y=%d)\n",
+    printf("largestShape s(x=%d,y=%d)\n",
            Shape_getX(s), Shape_getY(s));
 
     drawAllShapes(shapes, sizeof(shapes)/sizeof(shapes[0]));
@@ -112,8 +112,8 @@ int main() {
 
 
 void Shape_ctor(Shape * const me, int16_t x, int16_t y){
-    me->vptr.area = Shape_area;
-    me->vptr.draw = Shape_draw;
+    static IShapeOperations const vptr = {Shape_area,Shape_draw};
+    me->vptr = &vptr;
     me->x = x;
     me->y = y;
 }
@@ -146,9 +146,9 @@ int16_t Shape_getY(Shape const * const me) {
 
 void Rectangle_ctor(Rectangle * const me, int16_t x, int16_t y,uint16_t width, uint16_t height)
 {
+    static IShapeOperations const vptr = {Rectangle_area,Rectangle_draw};
     Shape_ctor((Shape *)me, x, y);
-    me->super.vptr.area = Rectangle_area;
-    me->super.vptr.draw = Rectangle_draw;
+    me->super.vptr = &vptr;
     me->width = width;
     me->height = height;
 }
@@ -171,9 +171,9 @@ void Rectangle_dtor(Rectangle * const me)
 
 
 void Circle_ctor(Circle * const me, int16_t x, int16_t y, uint16_t rad){
+    static IShapeOperations const vptr = {Circle_area, Circle_draw};
     Shape_ctor((Shape *)me, x, y);
-    //me->super.vptr.area = Circle_area;
-    //me->super.vptr.draw = Circle_draw;
+    me->super.vptr = &vptr;
     me->rad = rad;
 }
 
@@ -198,7 +198,7 @@ Shape const *largestShape(Shape const *shapes[], uint32_t nShapes) {
     uint32_t max = 0U;
     uint32_t i;
     for (i = 0U; i < nShapes; ++i) {
-        uint32_t area = shapes[i]->vptr.area(shapes[i]);
+        uint32_t area = shapes[i]->vptr->area(shapes[i]);
         if (area > max) {
             max = area;
             s = shapes[i];
@@ -210,6 +210,6 @@ Shape const *largestShape(Shape const *shapes[], uint32_t nShapes) {
 void drawAllShapes(Shape const *shapes[], uint32_t nShapes) {
     uint32_t i;
     for (i = 0U; i < nShapes; ++i) {
-        shapes[i]->vptr.draw(shapes[i]);
+        shapes[i]->vptr->draw(shapes[i]);
     }
 }

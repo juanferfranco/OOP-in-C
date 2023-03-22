@@ -107,6 +107,15 @@ int main() {
 
     drawAllShapes(shapes, sizeof(shapes)/sizeof(shapes[0]));
 
+    Rectangle_dtor(r1);
+    free(r1);
+    Rectangle_dtor(r2);
+    free(r2);
+    Circle_dtor(c1);
+    free(c1);
+    Circle_dtor(c2);
+    free(c2);
+
     return 0;
 }
 

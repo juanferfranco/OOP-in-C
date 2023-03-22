@@ -38,10 +38,9 @@ void Receiver_doSomethingElse(Receiver* self, char* b) {
     printf("Receiver: Also working on (%s).\n", b);
 }
 
-
-
-/***************************^*/
-
+/*****************************************************
+* Class
+******************************************************/
 struct SimpleCommand {
     ICommand base;
     char* payload;
@@ -51,9 +50,10 @@ void SimpleCommand_execute(ICommand* command) {
     SimpleCommand* self = (SimpleCommand*)command;
     printf("SimpleCommand: See, I can do simple things like printing (%s)\n", self->payload);
 }
-//***************************
 
-
+/*****************************************************
+* Class
+******************************************************/
 struct ComplexCommand {
     ICommand base;
     Receiver* receiver;
@@ -67,9 +67,6 @@ void ComplexCommand_execute(ICommand* command) {
     self->receiver->doSomething(self->receiver, self->a);
     self->receiver->doSomethingElse(self->receiver, self->b);
 }
-
-
-
 
 SimpleCommand* SimpleCommand_new(char* payload) {
     SimpleCommand* self = (SimpleCommand*)malloc(sizeof(SimpleCommand));
@@ -86,7 +83,6 @@ ComplexCommand* ComplexCommand_new(Receiver* receiver, char* a, char* b) {
     self->b = b;
     return self;
 }
-
 
 int main() {
     Receiver* receiver = (Receiver*)malloc(sizeof(Receiver));
